@@ -199,7 +199,7 @@
     type: looker_column
     model: snowflake_segment_tracks
     explore: sessions_trk
-    measures: [session_trk_facts.count_viewed_product, session_trk_facts.count_signup]
+    measures: [session_trk_facts.count_viewed_product, session_trk_facts.count_product_added, session_trk_facts.count_order_completed ]
     listen:
       date: sessions_trk.start_date
     sorts: [session_trk_facts.count_viewed_product desc]

@@ -7,8 +7,10 @@ view: session_trk_facts {
     s.session_id
         , MAX(map.timestamp) AS ended_time
         , count(distinct map.event_id) AS num_pvs
-        , count(case when map.event = 'viewed_product' then event_id else null end) as cnt_viewed_product
-        , count(case when map.event = 'signup' then event_id else null end) as cnt_signup
+        , sum(case when map.event = 'product_viewed' then 1 else null end) as cnt_viewed_product
+        , sum(case when map.event = 'product_added' then 1 else null end) as cnt_product_added
+        , sum(case when map.event = 'order_completed' then 1 else null end) as cnt_order_completed
+
       FROM ${sessions_trk.SQL_TABLE_NAME} AS s
       LEFT JOIN ${track_facts.SQL_TABLE_NAME} as map on map.session_id = s.session_id
       GROUP BY 1
@@ -37,10 +39,21 @@ view: session_trk_facts {
     sql: ${number_events} = 1 ;;
   }
 
-  dimension: viewed_product {
+  dimension: product_viewed {
     type: yesno
     sql: ${TABLE}.cnt_viewed_product > 0 ;;
   }
+
+  dimension: product_added {
+    type: yesno
+    sql: ${TABLE}.cnt_product_added > 0 ;;
+  }
+
+  dimension: order_completed {
+    type: yesno
+    sql: ${TABLE}.cnt_order_completed > 0 ;;
+  }
+
 
   dimension: signup {
     type: yesno
@@ -51,7 +64,25 @@ view: session_trk_facts {
     type: count
 
     filters: {
-      field: viewed_product
+      field: product_viewed
+      value: "yes"
+    }
+  }
+
+  measure: count_product_added {
+    type: count
+
+    filters: {
+      field: product_added
+      value: "yes"
+    }
+  }
+
+  measure: count_order_completed {
+    type: count
+
+    filters: {
+      field: order_completed
       value: "yes"
     }
   }
